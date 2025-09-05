@@ -79,140 +79,40 @@ IP Address Classes Overview:
 ```
 
 #### Private IP Address Ranges (RFC 1918)
-```python
-class IPAddressCalculator:
-    def __init__(self):
-        self.private_ranges = {
-            'class_a': {
-                'range': '10.0.0.0/8',
-                'start': '10.0.0.0',
-                'end': '10.255.255.255',
-                'total_addresses': 16777216,
-                'use_case': 'Large enterprises, cloud providers'
-            },
-            'class_b': {
-                'range': '172.16.0.0/12',
-                'start': '172.16.0.0',
-                'end': '172.31.255.255',
-                'total_addresses': 1048576,
-                'use_case': 'Medium enterprises, corporate networks'
-            },
-            'class_c': {
-                'range': '192.168.0.0/16',
-                'start': '192.168.0.0',
-                'end': '192.168.255.255',
-                'total_addresses': 65536,
-                'use_case': 'Small offices, home networks'
-            }
-        }
-    
-    def calculate_subnet_info(self, cidr):
-        """Calculate subnet information from CIDR notation"""
-        network, prefix_length = cidr.split('/')
-        prefix_length = int(prefix_length)
-        
-        # Calculate subnet mask
-        mask_bits = '1' * prefix_length + '0' * (32 - prefix_length)
-        subnet_mask = '.'.join([
-            str(int(mask_bits[i:i+8], 2)) for i in range(0, 32, 8)
-        ])
-        
-        # Calculate number of hosts
-        host_bits = 32 - prefix_length
-        total_addresses = 2 ** host_bits
-        usable_hosts = total_addresses - 2  # Subtract network and broadcast
-        
-        return {
-            'network': network,
-            'prefix_length': prefix_length,
-            'subnet_mask': subnet_mask,
-            'total_addresses': total_addresses,
-            'usable_hosts': usable_hosts,
-            'network_address': network,
-            'broadcast_address': self._calculate_broadcast(network, prefix_length)
-        }
-    
-    def _calculate_broadcast(self, network, prefix_length):
-        """Calculate broadcast address"""
-        # Simplified calculation for demonstration
-        octets = network.split('.')
-        host_bits = 32 - prefix_length
-        
-        if host_bits >= 8:
-            octets[3] = '255'
-        if host_bits >= 16:
-            octets[2] = '255'
-        if host_bits >= 24:
-            octets[1] = '255'
-            
-        return '.'.join(octets)
+```
+Private IP Ranges for Internal Networks:
+├── Class A Private Range
+│   ├── Network: 10.0.0.0/8
+│   ├── Address Range: 10.0.0.0 to 10.255.255.255
+│   ├── Total Addresses: 16,777,216
+│   ├── Use Case: Large enterprises, cloud providers
+│   └── MyLearning Choice: ✓ Selected for production VPC
+├── Class B Private Range
+│   ├── Network: 172.16.0.0/12
+│   ├── Address Range: 172.16.0.0 to 172.31.255.255
+│   ├── Total Addresses: 1,048,576
+│   ├── Use Case: Medium enterprises, corporate networks
+│   └── Common for hybrid cloud setups
+└── Class C Private Range
+    ├── Network: 192.168.0.0/16
+    ├── Address Range: 192.168.0.0 to 192.168.255.255
+    ├── Total Addresses: 65,536
+    ├── Use Case: Small offices, home networks
+    └── Limited scalability for enterprise use
+```
 
-# MyLearning.com IP Planning
-def mylearning_ip_planning():
-    """IP address planning for MyLearning.com VPC"""
-    
-    calculator = IPAddressCalculator()
-    
-    # Main VPC CIDR
-    vpc_cidr = '10.0.0.0/16'
-    vpc_info = calculator.calculate_subnet_info(vpc_cidr)
-    
-    # Subnet planning
-    subnets = {
-        'public_subnet_1a': {
-            'cidr': '10.0.1.0/24',
-            'az': 'ap-south-1a',
-            'purpose': 'Load balancers, NAT Gateway',
-            'hosts': 254
-        },
-        'public_subnet_1b': {
-            'cidr': '10.0.2.0/24',
-            'az': 'ap-south-1b',
-            'purpose': 'Load balancers, NAT Gateway',
-            'hosts': 254
-        },
-        'private_subnet_1a': {
-            'cidr': '10.0.11.0/24',
-            'az': 'ap-south-1a',
-            'purpose': 'Web servers, Application servers',
-            'hosts': 254
-        },
-        'private_subnet_1b': {
-            'cidr': '10.0.12.0/24',
-            'az': 'ap-south-1b',
-            'purpose': 'Web servers, Application servers',
-            'hosts': 254
-        },
-        'database_subnet_1a': {
-            'cidr': '10.0.21.0/24',
-            'az': 'ap-south-1a',
-            'purpose': 'Database servers, Cache servers',
-            'hosts': 254
-        },
-        'database_subnet_1b': {
-            'cidr': '10.0.22.0/24',
-            'az': 'ap-south-1b',
-            'purpose': 'Database servers, Cache servers',
-            'hosts': 254
-        }
-    }
-    
-    return {
-        'vpc_info': vpc_info,
-        'subnets': subnets,
-        'total_subnets': len(subnets),
-        'reserved_addresses': sum([subnet['hosts'] for subnet in subnets.values()]),
-        'available_for_expansion': vpc_info['usable_hosts'] - sum([subnet['hosts'] for subnet in subnets.values()])
-    }
-
-# Execute planning
-ip_plan = mylearning_ip_planning()
-print("MyLearning.com VPC IP Address Planning:")
-print(f"VPC CIDR: {ip_plan['vpc_info']['network']}/{ip_plan['vpc_info']['prefix_length']}")
-print(f"Total Usable Hosts: {ip_plan['vpc_info']['usable_hosts']:,}")
-print(f"Planned Subnets: {ip_plan['total_subnets']}")
-print(f"Reserved Addresses: {ip_plan['reserved_addresses']:,}")
-print(f"Available for Expansion: {ip_plan['available_for_expansion']:,}")
+#### MyLearning.com IP Address Planning
+```
+VPC CIDR Selection: 10.0.0.0/16
+├── Total Available Addresses: 65,536
+├── Usable Host Addresses: 65,534 (minus network & broadcast)
+├── Subnet Allocation Strategy:
+│   ├── Public Subnets: 10.0.1.0/24 & 10.0.2.0/24 (512 addresses)
+│   ├── Private App Subnets: 10.0.11.0/24 & 10.0.12.0/24 (512 addresses)
+│   ├── Database Subnets: 10.0.21.0/24 & 10.0.22.0/24 (512 addresses)
+│   └── Reserved for Future: 10.0.100.0/22 (1,024 addresses for expansion)
+├── Growth Capacity: 63,000+ addresses available for scaling
+└── Multi-Region Expansion: Non-overlapping CIDR blocks planned
 ```
 
 ### CIDR Notation and Subnetting
@@ -282,115 +182,70 @@ AWS VPC CIDR Requirements:
 ### The Need for VPC
 
 #### Why Default VPC Isn't Enough
-```python
-def vpc_comparison_analysis():
-    """Compare Default VPC vs Custom VPC for MyLearning.com"""
-    
-    comparison = {
-        'default_vpc': {
-            'security': {
-                'isolation': 'Shared with other AWS resources',
-                'network_segmentation': 'Limited (single subnet type)',
-                'access_control': 'Basic security groups only',
-                'compliance': 'Difficult to achieve enterprise compliance',
-                'monitoring': 'Limited network visibility'
-            },
-            'scalability': {
-                'subnet_design': 'Fixed subnet structure',
-                'ip_planning': 'No control over IP ranges',
-                'multi_tier': 'Not supported',
-                'expansion': 'Limited customization options'
-            },
-            'cost': {
-                'nat_gateway': 'Shared resources (potential conflicts)',
-                'data_transfer': 'No optimization possible',
-                'resource_allocation': 'Inefficient resource usage'
-            },
-            'operational': {
-                'troubleshooting': 'Limited network insights',
-                'customization': 'Minimal configuration options',
-                'integration': 'Basic connectivity options'
-            }
-        },
-        'custom_vpc': {
-            'security': {
-                'isolation': 'Complete network isolation',
-                'network_segmentation': 'Multi-tier architecture support',
-                'access_control': 'Security Groups + NACLs',
-                'compliance': 'Enterprise compliance ready',
-                'monitoring': 'VPC Flow Logs and detailed monitoring'
-            },
-            'scalability': {
-                'subnet_design': 'Flexible subnet architecture',
-                'ip_planning': 'Complete control over IP allocation',
-                'multi_tier': 'Public, Private, Database tiers',
-                'expansion': 'Designed for growth and scaling'
-            },
-            'cost': {
-                'nat_gateway': 'Optimized NAT Gateway placement',
-                'data_transfer': 'Efficient routing and data flow',
-                'resource_allocation': 'Right-sized network resources'
-            },
-            'operational': {
-                'troubleshooting': 'Comprehensive network visibility',
-                'customization': 'Full configuration control',
-                'integration': 'Advanced connectivity options'
-            }
-        }
-    }
-    
-    return comparison
+```
+Default VPC vs Custom VPC Comparison:
 
-# Business case for Custom VPC
-def business_case_custom_vpc():
-    """Business justification for moving to Custom VPC"""
-    
-    business_case = {
-        'security_requirements': {
-            'student_data_protection': 'GDPR compliance mandatory',
-            'payment_processing': 'PCI DSS compliance required',
-            'audit_requirements': 'SOC 2 Type II certification needed',
-            'data_residency': 'Regional data storage requirements'
-        },
-        'compliance_benefits': {
-            'network_isolation': 'Complete separation from other tenants',
-            'access_logging': 'Detailed audit trails for all network access',
-            'encryption_in_transit': 'Controlled network encryption',
-            'incident_response': 'Faster security incident investigation'
-        },
-        'cost_optimization': {
-            'nat_gateway_efficiency': '40% reduction in NAT costs',
-            'data_transfer_optimization': '25% reduction in data transfer costs',
-            'resource_right_sizing': '30% improvement in resource utilization',
-            'operational_efficiency': '50% reduction in network troubleshooting time'
-        },
-        'scalability_advantages': {
-            'multi_region_expansion': 'Consistent network architecture',
-            'microservices_support': 'Service mesh ready architecture',
-            'hybrid_connectivity': 'VPN and Direct Connect integration',
-            'disaster_recovery': 'Cross-region failover capabilities'
-        },
-        'roi_calculation': {
-            'implementation_cost': '₹5,00,000 (one-time)',
-            'annual_savings': '₹15,00,000 (compliance + efficiency)',
-            'risk_mitigation': '₹50,00,000 (potential breach costs avoided)',
-            'payback_period': '4 months',
-            'three_year_roi': '900%'
-        }
-    }
-    
-    return business_case
+🏠 DEFAULT VPC (Current State)
+├── Security Limitations
+│   ├── ❌ Shared with other AWS resources
+│   ├── ❌ Single subnet type (no segmentation)
+│   ├── ❌ Basic security groups only
+│   ├── ❌ Difficult compliance achievement
+│   └── ❌ Limited network visibility
+├── Scalability Issues
+│   ├── ❌ Fixed subnet structure
+│   ├── ❌ No IP range control
+│   ├── ❌ No multi-tier support
+│   └── ❌ Limited customization
+└── Operational Challenges
+    ├── ❌ Basic troubleshooting capabilities
+    ├── ❌ Minimal configuration options
+    └── ❌ Limited integration possibilities
 
-# Execute analysis
-vpc_analysis = vpc_comparison_analysis()
-business_case = business_case_custom_vpc()
+🏢 CUSTOM VPC (Target State)
+├── Security Advantages
+│   ├── ✅ Complete network isolation
+│   ├── ✅ Multi-tier architecture support
+│   ├── ✅ Security Groups + NACLs
+│   ├── ✅ Enterprise compliance ready
+│   └── ✅ VPC Flow Logs monitoring
+├── Scalability Benefits
+│   ├── ✅ Flexible subnet architecture
+│   ├── ✅ Complete IP allocation control
+│   ├── ✅ Public, Private, Database tiers
+│   └── ✅ Designed for growth
+└── Operational Excellence
+    ├── ✅ Comprehensive network visibility
+    ├── ✅ Full configuration control
+    └── ✅ Advanced connectivity options
+```
 
-print("MyLearning.com VPC Migration Business Case:")
-print(f"Implementation Cost: {business_case['roi_calculation']['implementation_cost']}")
-print(f"Annual Savings: {business_case['roi_calculation']['annual_savings']}")
-print(f"Risk Mitigation Value: {business_case['roi_calculation']['risk_mitigation']}")
-print(f"Payback Period: {business_case['roi_calculation']['payback_period']}")
-print(f"Three-Year ROI: {business_case['roi_calculation']['three_year_roi']}")
+#### Business Case for Custom VPC
+```
+MyLearning.com VPC Migration ROI Analysis:
+
+💰 FINANCIAL IMPACT
+├── Implementation Cost: ₹5,00,000 (one-time)
+├── Annual Savings: ₹15,00,000
+│   ├── NAT Gateway efficiency: 40% cost reduction
+│   ├── Data transfer optimization: 25% savings
+│   ├── Resource right-sizing: 30% improvement
+│   └── Operational efficiency: 50% time reduction
+├── Risk Mitigation: ₹50,00,000 (potential breach costs avoided)
+├── Payback Period: 4 months
+└── Three-Year ROI: 900%
+
+🛡️ COMPLIANCE REQUIREMENTS
+├── Student Data Protection: GDPR compliance mandatory
+├── Payment Processing: PCI DSS compliance required
+├── Audit Requirements: SOC 2 Type II certification needed
+└── Data Residency: Regional storage requirements
+
+📈 SCALABILITY ADVANTAGES
+├── Multi-region expansion ready
+├── Microservices architecture support
+├── Hybrid connectivity (VPN/Direct Connect)
+└── Cross-region disaster recovery
 ```
 
 ### Network Security Incident Response
@@ -398,36 +253,42 @@ print(f"Three-Year ROI: {business_case['roi_calculation']['three_year_roi']}")
 #### Immediate Actions Taken
 ```
 Incident Response Timeline - September 15, 2023:
-├── 09:47 AM - Incident Detection
-│   ├── Automated alert from CloudWatch
-│   ├── Unusual connection patterns detected
-│   ├── Security team notified immediately
-│   └── Incident response team assembled
-├── 10:15 AM - Initial Assessment
-│   ├── Confirmed external attack attempt
-│   ├── Verified no successful breach
-│   ├── Identified attack vectors and methods
-│   └── Documented evidence for analysis
-├── 10:30 AM - Immediate Containment
-│   ├── Tightened security group rules
-│   ├── Blocked suspicious IP ranges
-│   ├── Enhanced monitoring activated
-│   └── Stakeholders notified
-├── 11:00 AM - Vulnerability Analysis
-│   ├── Network architecture review
-│   ├── Security posture assessment
-│   ├── Compliance gap analysis
-│   └── Risk assessment completed
-├── 02:00 PM - Strategic Planning
-│   ├── Custom VPC design initiated
-│   ├── Security enhancement roadmap
-│   ├── Compliance timeline established
-│   └── Budget approval obtained
-└── 05:00 PM - Implementation Planning
-    ├── Technical architecture finalized
-    ├── Migration strategy developed
-    ├── Testing plan established
-    └── Go-live timeline confirmed
+
+🚨 DETECTION PHASE (09:47 AM)
+├── Automated CloudWatch alert triggered
+├── Unusual database connection patterns detected
+├── Security team immediately notified
+└── Incident response team assembled
+
+🔍 ASSESSMENT PHASE (10:15 AM)
+├── Confirmed external attack attempt on port 5432
+├── Verified no successful breach occurred
+├── Identified port scanning and brute force methods
+└── Evidence documented for forensic analysis
+
+🛡️ CONTAINMENT PHASE (10:30 AM)
+├── Tightened security group rules immediately
+├── Blocked suspicious IP ranges (23 addresses)
+├── Enhanced monitoring activated across all systems
+└── Executive stakeholders notified
+
+📊 ANALYSIS PHASE (11:00 AM)
+├── Complete network architecture review
+├── Security posture gap assessment
+├── Compliance requirements analysis
+└── Risk impact evaluation completed
+
+📋 PLANNING PHASE (02:00 PM)
+├── Custom VPC design session initiated
+├── Security enhancement roadmap created
+├── Compliance timeline established (90 days)
+└── Budget approval obtained (₹5,00,000)
+
+🚀 IMPLEMENTATION PHASE (05:00 PM)
+├── Technical architecture finalized
+├── Migration strategy developed
+├── Testing plan established
+└── Go-live timeline confirmed (4 weeks)
 ```
 
 ### The Path Forward
