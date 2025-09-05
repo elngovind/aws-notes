@@ -658,7 +658,7 @@ MyLearning.com S3 Success Metrics (2023):
 
 ---
 
-## Module 3 Summary: The Storage Revolution Complete
+## Module 3&4 Summary: The Storage Revolution Complete
 
 ### Key Learnings from MyLearning.com's S3 Journey
 
@@ -702,4 +702,4 @@ The team's experience with S3 has given them confidence in AWS services, but new
 
 ---
 
-*This completes Module 3: Introduction to Storage Services and Deep Dive on Amazon S3. The MyLearning.com team has successfully transformed their storage infrastructure and learned valuable lessons about cloud-native architecture, cost optimization, and global scalability.*
+*This completes Module 3&4: Introduction to Storage Services and Deep Dive on Amazon S3. The MyLearning.com team has successfully transformed their storage infrastructure and learned valuable lessons about cloud-native architecture, cost optimization, and global scalability.*

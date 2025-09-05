@@ -1,8 +1,8 @@
-# Module 3: Introduction to Storage Services and Deep Dive on Amazon S3
+# Module 3&4: Introduction to Storage Services and Deep Dive on Amazon S3
 
 ## 📚 Module Overview
 
-This module continues the MyLearning.com journey as they face their biggest infrastructure challenge yet - managing and delivering massive amounts of educational content globally. Follow along as Raj, Priya, and Amit discover the power of object storage and transform their content delivery architecture using Amazon S3.
+This module (3&4) continues the MyLearning.com journey as they face their biggest infrastructure challenge yet - managing and delivering massive amounts of educational content globally. Follow along as Raj, Priya, and Amit discover the power of object storage and transform their content delivery architecture using Amazon S3.
 
 ## 🎯 Learning Objectives
 
@@ -284,9 +284,9 @@ This module aligns with several AWS certification paths:
 
 After completing this module, you'll be ready for:
 
-- **Module 4**: Compute Services with Amazon EC2
-- **Module 5**: Database Services and Amazon RDS
-- **Module 6**: Networking and Content Delivery
+- **Module 5**: Compute Services with Amazon EC2
+- **Module 6**: Database Services and Amazon RDS
+- **Module 7**: Networking and Content Delivery
 
 Continue following MyLearning.com's journey as they build a complete cloud-native educational platform!
 
