@@ -15,7 +15,7 @@
 
 [![AWS](https://img.shields.io/badge/AWS-Cloud%20Computing-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
 [![Training](https://img.shields.io/badge/Training-Professional%20Level-0066CC?style=for-the-badge&logo=graduation-cap&logoColor=white)](https://github.com/elngovind/aws-notes)
-[![Modules](https://img.shields.io/badge/Modules-10%20Complete-00C851?style=for-the-badge&logo=check-circle&logoColor=white)](https://github.com/elngovind/aws-notes)
+[![Modules](https://img.shields.io/badge/Modules-11%20Complete-00C851?style=for-the-badge&logo=check-circle&logoColor=white)](https://github.com/elngovind/aws-notes)
 [![Story](https://img.shields.io/badge/Story--Driven-Learning-8E44AD?style=for-the-badge&logo=book&logoColor=white)](https://github.com/elngovind/aws-notes)
 [![Hands-On](https://img.shields.io/badge/Hands--On-Labs-E74C3C?style=for-the-badge&logo=tools&logoColor=white)](https://github.com/elngovind/aws-notes)
 
@@ -227,6 +227,21 @@
 - 🎯 Operational excellence achievement
 
 **⏱️ Duration:** 6-8 hours | **🎯 Difficulty:** Intermediate-Advanced | **🛠️ Labs:** 6
+
+</details>
+
+<details>
+<summary>📊 <strong>Module 11: Advanced Monitoring & Compliance</strong> <em>(The Compliance Awakening)</em></summary>
+
+**🎬 Chapter Highlights:**
+- 🚨 The enterprise compliance crisis
+- 📈 Advanced CloudWatch mastery
+- ⚡ EventBridge automation triumph
+- 🔍 CloudTrail audit implementation
+- 🛡️ Real-time security monitoring
+- 💰 Cost optimization strategies
+
+**⏱️ Duration:** 8-10 hours | **🎯 Difficulty:** Advanced | **🛠️ Labs:** 7
 
 </details>
 

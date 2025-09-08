@@ -157,31 +157,53 @@ CloudFormation Deployment:
     └── Admin URL: https://<ip>/admin
 ```
 
-### Step 3: Initial Configuration
+### Step 3: Gather Admin Web UI Info from Stack Output
+
+#### Important Initialization Wait Time
+```
+Critical Timing Information:
+├── System Initialization: Up to 5 minutes required
+├── Two-Stage Process:
+│   ├── Stage 1: EC2 instance boot and basic setup
+│   ├── Stage 2: OpenVPN Access Server configuration
+│   └── Both stages must complete before access
+├── Early Access Issues:
+│   ├── Authentication failures if accessed too early
+│   ├── Service unavailable errors
+│   ├── Incomplete configuration state
+│   └── SSL certificate not ready
+└── Success Indicators:
+    ├── CloudFormation stack: CREATE_COMPLETE
+    ├── EC2 instance: Running state
+    ├── System logs: No initialization errors
+    └── Admin Web UI: Responds to requests
+```
 
 #### Admin Web UI Access
 ```
-Initial Setup Process:
-├── Access Admin Interface
-│   ├── URL: https://<public-ip>/admin
-│   ├── Username: openvpn
-│   ├── Password: From CloudFormation output
-│   └── Accept: SSL certificate warning
-├── First Login Tasks
-│   ├── Change default password
-│   ├── Review license information
-│   ├── Configure basic settings
-│   └── Set up network configuration
-├── Network Configuration
-│   ├── Server hostname: vpn.mylearning.com
-│   ├── VPN subnet: 172.27.224.0/20
-│   ├── DNS servers: 8.8.8.8, 8.8.4.4
-│   └── Routing: Enable internet access
-└── Security Settings
-    ├── Encryption: AES-256-CBC
-    ├── Authentication: SHA256
-    ├── TLS version: 1.2 minimum
-    └── Certificate validity: 10 years
+Stack Output Information:
+├── CloudFormation Outputs Tab
+│   ├── IP Address: Public IP of Access Server instance
+│   ├── Username: Default admin username (openvpn)
+│   ├── Temporary Password: Auto-generated secure password
+│   └── Admin URL: https://<public_ip>/admin
+├── Access Process
+│   ├── Wait: 5 minutes after stack completion
+│   ├── Navigate: https://<public_ip>/admin
+│   ├── Accept: Self-signed SSL certificate warning
+│   ├── Login: openvpn / <temporary_password>
+│   └── Change: Default password immediately
+├── First Login Requirements
+│   ├── Password change: Mandatory on first login
+│   ├── License review: Accept terms and conditions
+│   ├── Basic configuration: Network and security settings
+│   └── User management: Set up initial users
+└── MyLearning.com Access Example
+    ├── IP Address: 13.234.56.78 (from stack output)
+    ├── Admin URL: https://13.234.56.78/admin
+    ├── Username: openvpn
+    ├── Temp Password: Kx9mP2$vR8nQ (example from output)
+    └── New Password: MyLearning@2024! (strong password)
 ```
 
 #### MyLearning.com Configuration
@@ -210,7 +232,146 @@ Production Configuration:
     └── Retention: 90 days
 ```
 
-### Step 4: User Management
+### Step 4: SSH Access to Instance
+
+#### Connect to Access Server Console
+```
+SSH Connection Process:
+├── Prerequisites
+│   ├── Private key file: From EC2 key pair used in deployment
+│   ├── Public IP: From CloudFormation stack output
+│   ├── Username: ubuntu (default for Ubuntu AMI)
+│   └── SSH client: Terminal, PuTTY, or similar
+├── Connection Command
+│   ├── Basic syntax: ssh -i /path/key-pair-name.pem ubuntu@<public-ip>
+│   ├── Example: ssh -i ~/.ssh/mylearning-keypair.pem ubuntu@13.234.56.78
+│   ├── Windows (PuTTY): Use .ppk format key file
+│   └── Permissions: chmod 400 key-pair-name.pem (Linux/macOS)
+├── MyLearning.com SSH Access
+│   ├── Key file: ~/.ssh/MyLearning-KeyPair.pem
+│   ├── Command: ssh -i ~/.ssh/MyLearning-KeyPair.pem ubuntu@13.234.56.78
+│   ├── First connection: Accept host key fingerprint
+│   └── Access granted: Ubuntu shell prompt
+└── Common SSH Tasks
+    ├── System updates: sudo apt update && sudo apt upgrade
+    ├── Log viewing: sudo tail -f /var/log/openvpnas.log
+    ├── Service status: sudo systemctl status openvpnas
+    └── Configuration backup: sudo /usr/local/openvpn_as/scripts/sacli
+```
+
+### Step 5: Assign Elastic IP (Recommended)
+
+#### Elastic IP Configuration
+```
+Elastic IP Assignment Process:
+├── Allocate Elastic IP
+│   ├── AWS Console: EC2 > Network & Security > Elastic IPs
+│   ├── Click: "Allocate Elastic IP address"
+│   ├── Pool: Amazon's pool of IPv4 addresses
+│   ├── Tags: Optional (Name: MyLearning-OpenVPN-EIP)
+│   └── Click: "Allocate"
+├── Associate with Instance
+│   ├── Select: Newly allocated Elastic IP
+│   ├── Actions: "Associate Elastic IP address"
+│   ├── Resource type: Instance
+│   ├── Instance: Select OpenVPN Access Server instance
+│   ├── Private IP: Select from dropdown
+│   └── Click: "Associate"
+├── Update OpenVPN Configuration
+│   ├── Admin Web UI: Configuration > Network Settings
+│   ├── Hostname field: Enter Elastic IP address
+│   ├── Click: "Save Settings"
+│   ├── Click: "Update Running Server"
+│   └── Wait: Configuration update completion
+└── MyLearning.com Implementation
+    ├── Elastic IP: 13.234.56.78
+    ├── DNS record: vpn.mylearning.com → 13.234.56.78
+    ├── SSL certificate: Custom domain certificate
+    └── Client updates: New configuration files generated
+```
+
+### Step 6: System Configuration
+
+#### Change Default Time Zone
+```
+Time Zone Configuration:
+├── SSH Access Required
+│   ├── Connect: ssh -i key.pem ubuntu@<elastic-ip>
+│   ├── Command: sudo dpkg-reconfigure tzdata
+│   ├── Interface: Text-based menu system
+│   └── Selection: Choose appropriate geographic region and city
+├── MyLearning.com Time Zone
+│   ├── Region: Asia
+│   ├── City: Kolkata (India Standard Time)
+│   ├── UTC Offset: +05:30
+│   └── Verification: date command shows correct time
+├── Importance for VPN
+│   ├── Log timestamps: Accurate for troubleshooting
+│   ├── Certificate validity: Time-sensitive operations
+│   ├── Session management: Timeout calculations
+│   └── Audit compliance: Proper time recording
+└── Alternative Method
+    ├── Command: sudo timedatectl set-timezone Asia/Kolkata
+    ├── Verification: timedatectl status
+    ├── Automatic: NTP synchronization
+    └── Persistent: Survives reboots
+```
+
+#### Install NTP Client
+```
+NTP Installation and Configuration:
+├── Installation
+│   ├── Command: sudo apt-get update && sudo apt-get install ntp
+│   ├── Service: Automatically starts after installation
+│   ├── Configuration: /etc/ntp.conf (default settings usually sufficient)
+│   └── Status check: sudo systemctl status ntp
+├── Importance for OpenVPN
+│   ├── Certificate validation: Time-sensitive PKI operations
+│   ├── Multi-factor authentication: TOTP requires accurate time
+│   ├── Log correlation: Synchronized timestamps across systems
+│   ├── Session management: Accurate timeout enforcement
+│   └── Security: Prevents time-based attacks
+├── MyLearning.com NTP Setup
+│   ├── NTP servers: Default Ubuntu pool servers
+│   ├── Sync status: ntpq -p (shows peer status)
+│   ├── Time accuracy: Within 1-2 seconds of UTC
+│   └── Monitoring: CloudWatch custom metric for time drift
+└── Verification Commands
+    ├── Service status: sudo systemctl status ntp
+    ├── Peer status: ntpq -p
+    ├── Time sync: timedatectl status
+    └── Manual sync: sudo ntpdate -s time.nist.gov
+```
+
+#### Disable Source/Destination Checking
+```
+Source/Destination Check Configuration:
+├── Purpose and Importance
+│   ├── Default behavior: EC2 validates packet source/destination
+│   ├── VPN requirement: Packets appear to come from different sources
+│   ├── Site-to-site VPN: Essential for proper routing
+│   ├── Client subnet access: Required for direct VPC communication
+│   └── Without disabling: Routing failures and connectivity issues
+├── Disable Process
+│   ├── EC2 Console: Navigate to Instances
+│   ├── Select: OpenVPN Access Server instance
+│   ├── Right-click: Networking > Change source/destination check
+│   ├── Setting: Select "Stop" under Source/Destination checking
+│   └── Save: Apply the configuration
+├── Use Cases Requiring This Setting
+│   ├── Site-to-site VPN: On-premises to AWS connectivity
+│   ├── VPC-to-VPC routing: Through OpenVPN instance
+│   ├── Client subnet routing: Direct access to VPN clients
+│   ├── NAT functionality: When OpenVPN acts as NAT gateway
+│   └── Custom routing: Advanced network topologies
+└── MyLearning.com Configuration
+    ├── Setting: Source/destination check disabled
+    ├── Reason: Site-to-site VPN to on-premises office
+    ├── Impact: Enables routing between VPC and office network
+    └── Monitoring: Route table verification and connectivity testing
+```
+
+### Step 7: User Management
 
 #### User Creation Process
 ```
@@ -288,85 +449,180 @@ User Organization Strategy:
     └── Session timeout: 4 hours
 ```
 
-### Step 5: Client Configuration
+### Step 8: Set Up Static Routes (Optional)
+
+#### Routing vs NAT Configuration
+```
+Routing Configuration Options:
+├── Default NAT Mode
+│   ├── Behavior: Network Address Translation enabled
+│   ├── Traffic appearance: Comes from Access Server local IP
+│   ├── Advantage: Simpler configuration, no route table changes
+│   ├── Limitation: VPC cannot directly access VPN client IPs
+│   └── Use case: Basic internet access and server connectivity
+├── Routing Mode (Advanced)
+│   ├── Behavior: Preserves original client IP addresses
+│   ├── Traffic appearance: Shows actual VPN client source IPs
+│   ├── Advantage: Direct VPC-to-client communication possible
+│   ├── Requirement: VPC route table configuration needed
+│   └── Use case: Bidirectional communication requirements
+├── Configuration Process
+│   ├── Admin Web UI: Configuration > VPN Settings
+│   ├── Routing section: Select "Yes, using Routing"
+│   ├── Subnet configuration: Define VPN client subnet
+│   ├── Save settings: Apply configuration
+│   └── Update server: Restart VPN service
+└── MyLearning.com Decision
+    ├── Mode selected: NAT (default)
+    ├── Reason: Simplified management
+    ├── VPN subnet: 172.27.224.0/20
+    └── Future consideration: Routing for specific use cases
+```
+
+#### VPC Route Table Configuration (If Using Routing)
+```
+Route Table Setup for Routing Mode:
+├── Identify Route Tables
+│   ├── VPC Console: Route Tables section
+│   ├── Target VPC: MyLearning-Prod-VPC
+│   ├── Subnets: Private subnets requiring VPN client access
+│   └── Main route table: Usually sufficient
+├── Add Static Route
+│   ├── Destination: 172.27.224.0/20 (VPN client subnet)
+│   ├── Target: OpenVPN Access Server instance ID
+│   ├── Description: "Route to OpenVPN clients"
+│   └── Save: Apply route table changes
+├── Route Propagation
+│   ├── Automatic: Not available for OpenVPN
+│   ├── Manual: Static routes required
+│   ├── Multiple subnets: Add route to each relevant table
+│   └── Verification: Test connectivity from VPC resources
+├── AWS Documentation Reference
+│   ├── Guide: "Route tables for your VPC"
+│   ├── URL: AWS VPC routing documentation
+│   ├── Best practices: Route table management
+│   └── Troubleshooting: Common routing issues
+└── MyLearning.com Implementation
+    ├── Current mode: NAT (no routes needed)
+    ├── Future routing: If direct client access required
+    ├── Route target: i-0123456789abcdef0 (OpenVPN instance)
+    └── Monitoring: VPC Flow Logs for traffic analysis
+```
+
+### Step 9: Update Operating System
+
+#### System Updates and Maintenance
+```
+Operating System Update Process:
+├── Update Package Lists
+│   ├── Command: sudo apt-get update
+│   ├── Purpose: Refresh available package information
+│   ├── Frequency: Before any package installation
+│   └── Output: Package list download progress
+├── Upgrade Installed Packages
+│   ├── Command: sudo apt-get upgrade
+│   ├── Purpose: Install security and bug fix updates
+│   ├── Interaction: May prompt for confirmation
+│   ├── Reboot: Required for kernel updates
+│   └── Duration: 5-15 minutes depending on updates
+├── MyLearning.com Update Schedule
+│   ├── Frequency: Weekly maintenance window
+│   ├── Time: Sunday 2:00 AM IST (low usage period)
+│   ├── Process: Automated via cron job
+│   ├── Monitoring: Update status tracking
+│   └── Rollback: Snapshot before major updates
+├── Security Considerations
+│   ├── Timing: Apply security updates promptly
+│   ├── Testing: Validate VPN functionality after updates
+│   ├── Backup: System snapshot before updates
+│   ├── Monitoring: Watch for service disruptions
+│   └── Documentation: Track applied updates
+└── Automation Script Example
+    ├── Cron job: 0 2 * * 0 /usr/local/bin/update-system.sh
+    ├── Script: Automated update with logging
+    ├── Notification: Email on completion/failure
+    └── Validation: Post-update connectivity test
+```
+
+### Step 10: Client Configuration
 
 #### Client Software Installation
 ```
 Client Setup Process:
 ├── Download Client Software
-│   ├── Windows: OpenVPN Connect or GUI
+│   ├── Windows: OpenVPN Connect or OpenVPN GUI
 │   ├── macOS: OpenVPN Connect or Tunnelblick
-│   ├── Linux: OpenVPN package
-│   ├── iOS: OpenVPN Connect app
-│   └── Android: OpenVPN Connect app
+│   ├── Linux: OpenVPN package (apt/yum install openvpn)
+│   ├── iOS: OpenVPN Connect app (App Store)
+│   └── Android: OpenVPN Connect app (Google Play)
 ├── Configuration File Generation
-│   ├── User portal access: https://<server-ip>/
-│   ├── Login with credentials
-│   ├── Download profile: .ovpn file
+│   ├── User portal access: https://<server-ip>/ (not /admin)
+│   ├── Login with user credentials (not admin)
+│   ├── Download profile: .ovpn file or auto-login profile
 │   └── Import to client software
 ├── Connection Process
 │   ├── Import configuration file
-│   ├── Enter username and password
+│   ├── Enter username and password (if not embedded)
 │   ├── Provide MFA token (if enabled)
 │   ├── Establish connection
 │   └── Verify connectivity
 └── MyLearning.com Client Distribution
-    ├── Self-service portal: Primary method
-    ├── IT helpdesk: Assisted setup
-    ├── Email delivery: Encrypted files
-    └── Mobile device management: Automated
+    ├── Self-service portal: https://vpn.mylearning.com/
+    ├── IT helpdesk: Assisted setup for non-technical users
+    ├── Email delivery: Encrypted .ovpn files
+    └── Mobile device management: Automated deployment
 ```
 
 #### Connection Verification
 ```
 Connectivity Testing:
 ├── Basic Connectivity
-│   ├── VPN IP assignment: 172.27.224.x
+│   ├── VPN IP assignment: 172.27.224.x range
 │   ├── DNS resolution: nslookup mylearning.internal
 │   ├── Internet access: ping 8.8.8.8
 │   └── VPN gateway: ping <server-internal-ip>
 ├── Internal Resource Access
-│   ├── Web applications: HTTP/HTTPS access
-│   ├── Database servers: Port connectivity
-│   ├── File shares: SMB/NFS access
-│   └── SSH/RDP: Remote administration
+│   ├── Web applications: HTTP/HTTPS to internal servers
+│   ├── Database servers: Port connectivity testing
+│   ├── File shares: SMB/NFS access verification
+│   └── SSH/RDP: Remote administration access
 ├── Performance Testing
-│   ├── Bandwidth test: speedtest-cli
-│   ├── Latency measurement: ping tests
-│   ├── Application response: Real-world usage
-│   └── Concurrent connections: Multi-device test
+│   ├── Bandwidth test: speedtest-cli or web-based tools
+│   ├── Latency measurement: ping tests to various targets
+│   ├── Application response: Real-world usage scenarios
+│   └── Concurrent connections: Multi-device testing
 └── Security Validation
-    ├── IP leak test: whatismyipaddress.com
-    ├── DNS leak test: dnsleaktest.com
-    ├── Traffic encryption: Wireshark analysis
-    └── Access controls: Unauthorized resource test
+    ├── IP leak test: whatismyipaddress.com verification
+    ├── DNS leak test: dnsleaktest.com checking
+    ├── Traffic encryption: Wireshark packet analysis
+    └── Access controls: Test unauthorized resource access
 ```
 
-### Step 6: Advanced Configuration
+### Step 11: Advanced Configuration
 
-#### Elastic IP Assignment
+#### Post-Deployment Optimizations
 ```
-Elastic IP Configuration:
-├── Allocate Elastic IP
-│   ├── AWS Console: EC2 > Elastic IPs
-│   ├── Allocate new address
-│   ├── Associate with OpenVPN instance
-│   └── Update DNS records
-├── OpenVPN Server Update
-│   ├── Admin interface: Configuration > Network Settings
-│   ├── Hostname field: Update to Elastic IP
-│   ├── Save settings
-│   └── Update running server
-├── Client Configuration Update
-│   ├── Generate new client profiles
-│   ├── Distribute updated configurations
-│   ├── Test connectivity
-│   └── Retire old configurations
-└── MyLearning.com Implementation
-    ├── Elastic IP: 13.234.56.78
-    ├── DNS record: vpn.mylearning.com
-    ├── SSL certificate: Let's Encrypt
-    └── Client update: Automated via MDM
+Advanced Configuration Tasks:
+├── Elastic IP (Already covered in Step 5)
+│   ├── Static IP assignment for consistent access
+│   ├── DNS record configuration
+│   ├── SSL certificate management
+│   └── Client configuration updates
+├── Time Zone and NTP (Already covered in Step 6)
+│   ├── Accurate time synchronization
+│   ├── Important for certificate validation
+│   ├── Critical for MFA functionality
+│   └── Required for audit logging
+├── Source/Destination Check (Already covered in Step 6)
+│   ├── Disabled for VPN routing functionality
+│   ├── Essential for site-to-site VPN
+│   ├── Required for custom routing scenarios
+│   └── Enables NAT and forwarding capabilities
+└── System Updates (Already covered in Step 9)
+    ├── Regular security updates
+    ├── Automated update scheduling
+    ├── Reboot management
+    └── Service continuity planning
 ```
 
 #### Security Hardening
